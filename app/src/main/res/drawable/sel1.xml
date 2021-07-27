@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--currently, no use for this xml. remove from final build.-->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_selected="false"
+        android:drawable="@drawable/disable" /> <!-- pressed -->
+    <item android:state_selected="true"
+        android:drawable="@drawable/enable" /> <!-- pressed -->
+    <item android:drawable="@drawable/enable" /> <!-- default -->
+</selector>
