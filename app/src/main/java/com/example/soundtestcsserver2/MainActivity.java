@@ -80,10 +80,16 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
 
                 audio.flush();
-                byte[] buff1 = new byte[65535];
+                byte[] buff1 = new byte[64000];
                 DatagramPacket clPacket = new DatagramPacket(buff1, buff1.length);
                 MulticastSocket ms = null;                                                  //enable now
                 InetAddress group = null;
+
+                //change : audio buffer is a global variable now
+                float[] newBF = new float[64000];
+                int newBFLength = 0;
+                //end change
+
                 try {
                     ms = new MulticastSocket(50001);                                       //enable now
                     group = InetAddress.getByName("224.0.0.3");                                //enable now
@@ -92,8 +98,17 @@ public class MainActivity extends AppCompatActivity {
                     audio.play();
                     while (bool1) {
                         ms.receive(clPacket);
-                        float[] newBF = convertInator(clPacket.getData(),clPacket.getLength());
-                         audio.write(newBF, 0, newBF.length, AudioTrack.WRITE_BLOCKING);
+
+                        //Change : fill the audio buffer here
+                        //float[] newBF = convertInator(clPacket.getData(),clPacket.getLength());
+                        newBFLength = clPacket.getLength()/4;
+                        for(int i = 0 ;i<clPacket.getLength();i+=8){
+                            newBF[i/4]=Float.intBitsToFloat((buff1[i+0]&one)|((buff1[i+1]&one)<<8)|((buff1[i+2]&one)<<16)|(buff1[i+3]<<24));
+                            newBF[(i/4)+1]=Float.intBitsToFloat((buff1[i+4]&one)|((buff1[i+5]&one)<<8)|((buff1[i+6]&one)<<16)|(buff1[i+7]<<24));
+                        }
+                        //end change
+
+                        audio.write(newBF, 0, newBFLength, AudioTrack.WRITE_BLOCKING);
                      //   Log.i("playing", "data size : "+ newBF.length + " data written : "+i+" diff "+ (newBF.length-i));
                     }
                     ms.leaveGroup(group);                                                         //enable now
